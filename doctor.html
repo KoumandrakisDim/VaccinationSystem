@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Doctor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body ng-app="app">
+
+    <h1>Doctor</h1>
+
+    <div ng-controller="AppointmentController as vm">
+        <p>Enter the date to create a timeslot:</p>
+        <div>
+            <input type="datetime-local" ng-model="vm.selectedDate">
+            <button ng-click="vm.createTimeslot()" style="display:inline;">Create timeslot</button>
+        </div>
+
+
+        <h3 ng-if="vm.timeslots.length != 0 && vm.appointment.id == undefined">Timeslots</h3><br>
+
+        <div ng-repeat="timeslot in vm.timeslots" ng-if="vm.appointment.id == undefined" id="repeat" >
+
+            <div id="timeslots" >
+                <div id="timeslotsAppointments" class="clock">
+                    {{timeslot.date}}
+                </div>
+                <div id="timeslotsAppointments">{{timeslot.startingHour}}:{{timeslot.startingMinute}} -
+                    {{timeslot.finishHour}}:{{timeslot.finishMinute}}
+
+                </div>
+                <button ng-click="vm.canceltimeslot(timeslot, $index)">Cancel
+                    </button>
+
+
+
+            </div>
+
+        </div>
+
+        <h3 ng-show="vm.appointments.length != 0">Appointments</h3><br>
+        <div ng-repeat="appointment in vm.appointments" ng-show="vm.appointments.length != 0" id="repeat">
+            <div id="timeslots" id="timeslotsAppointments" >
+                {{appointment.timeslot.date}}
+                {{appointment.timeslot.startingHour}}:
+                {{appointment.timeslot.finishHour}}
+                Citizen: {{appointment.citizen.name}} {{appointment.citizen.surname}}
+                <button ng-click="vm.cancelAppointment(appointment.id, appointment.timeslot.id, $index)">Cancel
+                    </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/angular@1.8.0/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment-with-locales.min.js"></script>
+
+    <script>
+        angular.module('app', [])
+            .controller('AppointmentController', function ($http) {
+                var vm = this;
+                vm.appointments = [];
+                vm.selectedDate = '';
+                vm.timeslots = []
+                let doctorId = 1;
+                vm.doctor = {
+                    "id": "1",
+                    "name": "Dr",
+                    "surname": "Strange"
+                };
+                getAppointments()
+                getTimeslots()
+
+                vm.createTimeslot = function () {
+                    // console.log(vm.selectedDate.toISOString().slice(0, 10))
+                    // console.log(vm.selectedDate.toISOString().slice(11, 16))
+                    $http.post('http://localhost:8080/timeslot/create', {
+                        doctor: vm.doctor,
+                        date: vm.selectedDate.toISOString().slice(0, 10),
+                        startingHour: vm.selectedDate.toISOString().slice(11, 13),
+                        startingMinute: vm.selectedDate.toISOString().slice(14, 16),
+                        year: vm.selectedDate.toISOString().slice(0, 4),
+                        month: vm.selectedDate.toISOString().slice(5, 7),
+                        day: vm.selectedDate.toISOString().slice(8, 10),
+                    }).then(function (response) {
+                        console.log(response.data)
+                        vm.timeslots.push(response.data);
+                    });
+                }
+
+                vm.scheduleAppointment = function (timeslot) {
+                    // Make an HTTP request to the server to schedule an appointment
+                    // Replace 'http://example.com/schedule' with the URL of your server-side script that handles appointment scheduling
+                    $http.post('http://localhost:8080/appointments/createAppointment', {
+                        date: vm.selectedDate,
+                        timeslot: timeslot,
+                        citizen: citizen,
+                        doctor: timeslot.doctor
+                    }).then(function (response) {
+                        vm.appointment = response.data;
+                        alert('Your appointment has been scheduled for ' + vm.appointment.date + ' at ' +
+                            timeslot.startingHour + ": " + timeslot.startingMinute);
+                        console.log(vm.appointment)
+                    });
+                };
+
+                function getTimeslots() {
+                    $http.get('http://localhost:8080/timeslot/getByDoctorId', {
+                        params: {
+                            doctorId: doctorId
+                        }
+                    }).then(function (response) {
+                        console.log(response.data)
+                        vm.timeslots = response.data;
+                    });
+                };
+
+                function getAppointments() {
+
+                    $http.get('http://localhost:8080/appointments/doctor', {
+                        params: {
+                            doctorId: doctorId,
+                            pageSize: 3,
+                            pageNumber: 0
+                        }
+
+                    }).then(function (response) {
+                        console.log(response.data)
+                        vm.appointments = response.data;
+                    });
+                };
+
+                vm.canceltimeslot = function (timeslot, index) {
+                    $http.delete('http://localhost:8080/timeslot/cancelTimeslot', {
+                        params: { timeslotId: timeslot.id }
+                    }).then(function (response) {
+                        alert("Timeslot canceled");
+                        vm.timeslots.splice(index, 1)
+
+                    });
+                };
+
+
+                vm.cancelAppointment = function (appointmentId, timeslotId, index) {
+                    console.log({ "appointmentId": appointmentId, "timeslotId": timeslotId });
+                    $http.delete('http://localhost:8080/appointments/cancelAppointment', {
+                        params: { appointmentId: appointmentId, "timeslotId": timeslotId }
+                    }).then(function (response) {
+                        alert("Appointment canceled");
+                        vm.appointment = null;
+                        vm.appointments.splice(index, 1)
+
+                    });
+                };
+
+
+            });
+    </script>
+</body>
+
+</html>

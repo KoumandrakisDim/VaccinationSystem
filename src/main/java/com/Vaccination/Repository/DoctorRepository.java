@@ -11,4 +11,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     @Query(value = "SELECT * FROM doctors WHERE id = ?",
             nativeQuery = true)
     Doctor findByIdCustom(Long id);
+
+    Doctor findByAmka(String amka);
 }

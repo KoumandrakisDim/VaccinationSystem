@@ -2,7 +2,10 @@ package com.Vaccination.Service;
 
 import com.Vaccination.Models.Citizen;
 import com.Vaccination.Models.DTO.CitizenDTO;
+import com.Vaccination.Models.DTO.DoctorDTO;
+import com.Vaccination.Models.Doctor;
 import com.Vaccination.Repository.CitizenRepository;
+import com.Vaccination.Repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.Vaccination.Service.Database.connectToDatabase;
 import static com.Vaccination.Service.Database.getQueryResults;
@@ -20,8 +24,39 @@ public class CitizenService {
 
     @Autowired
     CitizenRepository citizenRepository;
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     public CitizenDTO getCitizenById(Long id) {
         return new CitizenDTO(citizenRepository.findByIdCustom(id));
+    }
+
+    public Object login(String amka, String password) {
+        Citizen citizen = citizenRepository.findByAmka(amka);
+        Doctor doctor = doctorRepository.findByAmka(amka);
+        Citizen dummyCit = new Citizen();
+
+        if(citizen != null){
+            if(Objects.equals(citizen.getPassword(), password)){
+                return citizen;
+            }
+            else{
+                dummyCit.setAmka("Wrong password");
+                return dummyCit;
+            }
+        }
+        if(doctor != null){
+            if(doctor.getPassword().equals(password)){
+                return new DoctorDTO(doctor);
+            }
+            else{
+                dummyCit.setAmka("Wrong password");
+                return dummyCit;
+            }
+        }
+
+        dummyCit.setAmka("Wrong amka");
+        return dummyCit;
     }
 
     public List<Citizen> getAll() throws Exception {
@@ -39,30 +74,12 @@ public class CitizenService {
         return citizenRepository.findAll();
     }
 
-    public Citizen save(Citizen citizen) throws SQLException, ClassNotFoundException {
+    public Citizen save(Citizen citizen) {
 
 //        PreparedStatement preparedStatement;
         if(citizen.getId() != null){
             citizenRepository.save(citizen);
 
-//            preparedStatement = connectToDatabase().prepareStatement("UPDATE citizens " +
-//                    "SET amka = ?, afm = ?, name = ?, surname = ?, email = ? WHERE id = ?");
-//
-//            preparedStatement.setString(1, citizen.getAmka());
-//            preparedStatement.setString(2, citizen.getAfm());
-//            preparedStatement.setString(3, citizen.getName());
-//            preparedStatement.setString(4, citizen.getSurname());
-//            preparedStatement.setString(5, citizen.getEmail());
-//            preparedStatement.setLong(6, citizen.getId());
-        }
-        else{
-//            preparedStatement = connectToDatabase().prepareStatement("INSERT INTO citizens" +
-//                    " (amka, afm, name, surname, email) VALUES(?, ?, ?, ?, ?)");
-//            preparedStatement.setString(1, citizen.getAmka());
-//            preparedStatement.setString(2, citizen.getAfm());
-//            preparedStatement.setString(3, citizen.getName());
-//            preparedStatement.setString(4, citizen.getSurname());
-//            preparedStatement.setString(5, citizen.getEmail());
 //
         }
 //        preparedStatement.executeUpdate();

@@ -9,4 +9,6 @@ public interface CitizenRepository extends JpaRepository<Citizen, Long> {
     @Query(value = "SELECT * FROM citizens WHERE id = ?",
             nativeQuery = true)
     Citizen findByIdCustom(Long id);
+
+    Citizen findByAmka(String amka);
 }

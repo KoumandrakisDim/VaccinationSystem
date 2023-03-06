@@ -15,6 +15,8 @@ public class CitizenDTO {
     private String surname;
     private String email;
     private int timesCanceled;
+    private String vaccinationExpirationDate;
+    private Boolean isVaccinated;
 
     public CitizenDTO(Citizen citizen){
         this.id = citizen.getId();
@@ -24,5 +26,6 @@ public class CitizenDTO {
         this.surname = citizen.getSurname();
         this.email = citizen.getEmail();
         this.timesCanceled = citizen.getTimesCanceled();
+        this.vaccinationExpirationDate = citizen.getVaccinationExpirationDate();
     }
 }

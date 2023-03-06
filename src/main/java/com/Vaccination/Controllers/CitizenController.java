@@ -3,6 +3,7 @@ package com.Vaccination.Controllers;
 import com.Vaccination.Models.Citizen;
 import com.Vaccination.Models.DTO.CitizenDTO;
 import com.Vaccination.Service.CitizenService;
+import com.Vaccination.helper.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,12 @@ public class CitizenController {
 
     @Autowired
     private CitizenService citizenService;
+
+    @GetMapping(path="login")
+    public Object login(@RequestParam String amka, @RequestParam String password) {
+        return citizenService.login(amka, password);
+
+    }
 
     @GetMapping(path="citizen/getById")
     public CitizenDTO getBookById(@RequestParam Long id) throws SQLException, ClassNotFoundException {

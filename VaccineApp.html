@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Vaccination Booking App</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="https://unpkg.com/angular@1.8.0/angular.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment-with-locales.min.js"></script>
+  <script src="VaccineApp.js"></script>
+
+</head>
+
+<body ng-app="app">
+
+  <div ng-controller="VaccineController as vm">
+
+    <div class="container" style="width:550px" ng-if="!vm.isLogged">
+      <div style="text-align:center;color:blue">
+        <h3><b>Login</b></h3>
+
+      </div>
+
+      <form role="form" class="well" ng-hide="ifSearchUser">
+        <div class="form-group">
+          <label for="text"> Amka: </label>
+          <input type="number" id="amka" class="form-control" placeholder="Enter amka " ng-model="vm.amka">
+        </div>
+        <div class="form-group">
+          <label for="password"> Password: </label>
+          <input type="password" id="password" class="form-control" placeholder="Enter Password "
+            ng-model="vm.password">
+        </div>
+
+        <input type="button" class="btn btn-primary" ng-click="vm.login()" class="btn btn-primary" value="Submit">
+      </form>
+
+
+    </div>
+
+    <div ng-if="vm.isLogged && vm.citizen.email != null &&
+     (vm.citizen.isVaccinated==0 || vm.citizen.isVaccinated==null)">
+      <!--if user is citizen-->
+      <h1>Appointment Scheduler</h1>
+      <p>Hello {{vm.citizen.name}}</p>
+
+      <p ng-if="vm.appointment.id == undefined">Enter the date you would like to schedule an appointment:</p>
+      <input ng-if="vm.appointment.id == undefined" type="date" ng-model="vm.selectedDate"
+        ng-change="vm.searchAvailability()">
+
+      <label ng-if="vm.appointment.id == undefined">Month:</label>
+      <select ng-model="vm.selectedMonth" ng-options="month.name for month in vm.months"
+        ng-change="vm.searchAvailabilityByMonth()" ng-if="vm.appointment.id == undefined">
+        <option value="">Select a month</option>
+      </select>
+
+
+      <h3 ng-if="vm.timeslots.length != 0 && vm.appointment.id == undefined">Timeslots</h3><br>
+
+      <div ng-repeat="timeslot in vm.timeslots" ng-if="vm.appointment.id == undefined" id="repeat">
+
+        <div id="timeslots">
+          {{timeslot.date}}
+          {{timeslot.startingHour}}:{{timeslot.startingMinute}} -
+          {{timeslot.finishHour}}:{{timeslot.finishMinute}}
+          Doctor:{{timeslot.doctor.name}} {{timeslot.doctor.surname}}
+          <button ng-click="vm.scheduleAppointment(timeslot)">Schedule Appointment</button>
+
+        </div>
+      </div>
+
+      <h3 ng-show="vm.appointment.id != null">Appointments</h3><br>
+      <div ng-show="vm.appointment.id != null" id="appointments">
+        Date: {{vm.appointment.timeslot.date}}
+        Starting Hour: {{vm.appointment.timeslot.startingHour}}
+        finishHour: {{vm.appointment.timeslot.finishHour}}
+        Doctor: {{vm.appointment.doctor.name}} {{vm.appointment.doctor.surname}}
+        <button ng-click="vm.cancelAppointmentCitizen(vm.appointment.id, vm.appointment.timeslot.id)"
+          ng-disabled="vm.citizen.timesCanceled > 2">Cancel </button>
+      </div>
+    </div>
+
+    <div ng-if="vm.isLogged && vm.citizen.email != null && vm.citizen.isVaccinated==1"> <!--if user is vaccinated-->
+      You are vaccinated until {{vm.citizen.vaccinationExpirationDate}}
+    </div>
+
+    <!-- If user is doctor-->
+
+    <div ng-if="vm.isLogged && vm.citizen.email == null">
+      <h1>Doctor</h1>
+      <p>Enter the date to create a timeslot:</p>
+      <div>
+        <input type="datetime-local" ng-model="vm.selectedDate">
+        <button ng-click="vm.createTimeslot()" style="display:inline;">Create timeslot</button>
+      </div>
+
+
+      <h3 ng-if="vm.timeslots.length != 0 && vm.appointment.id == undefined">Timeslots</h3><br>
+
+      <div ng-repeat="timeslot in vm.timeslots" ng-if="vm.appointment.id == undefined" id="repeat">
+
+        <div id="timeslots">
+          <div id="timeslotsAppointments" class="clock">
+            {{timeslot.date}}
+          </div>
+          <div id="timeslotsAppointments">{{timeslot.startingHour}}:{{timeslot.startingMinute}} -
+            {{timeslot.finishHour}}:{{timeslot.finishMinute}}
+
+          </div>
+          <button ng-click="vm.canceltimeslot(timeslot, $index)">Cancel
+          </button>
+        </div>
+
+      </div>
+
+      <h3 ng-show="vm.appointments.length != 0">Appointments</h3><br>
+      <div ng-repeat="appointment in vm.pagedAppointments" ng-show="vm.appointments.length != 0" id="repeat">
+        <div id="timeslots" id="timeslotsAppointments">
+          {{appointment.timeslot.date}}
+          {{appointment.timeslot.startingHour}}
+          Citizen: {{appointment.citizen.name}} {{appointment.citizen.surname}}
+          <button ng-click="vm.confirmVaccination(appointment.citizen.id, $index)">Confirm Vaccination</button>
+          <button ng-click="vm.cancelAppointment(appointment.id, appointment.timeslot.id, $index)">Cancel</button>
+        </div>
+      </div>
+      <div id="pagination">
+        <button ng-click="vm.previousPage()">Previous</button>
+        <span id="current-page">{{ appointmentsCtrl.currentPage }}</span>
+        <button ng-click="vm.nextPage()">Next</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+
+  
+</script>
+
+</html>

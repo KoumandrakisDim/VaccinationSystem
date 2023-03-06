@@ -23,6 +23,8 @@ public class Citizen {
     private String email;
     private int timesCanceled;
     private String password;
+    private Boolean isVaccinated;
+    private String vaccinationExpirationDate;
 
     public Citizen(CitizenDTO citizenDTO) {
         this.name = citizenDTO.getName();
@@ -32,6 +34,8 @@ public class Citizen {
         this.surname = citizenDTO.getSurname();
         this.email = citizenDTO.getEmail();
         this.timesCanceled = citizenDTO.getTimesCanceled();
+        this.isVaccinated = citizenDTO.getIsVaccinated();
+        this.vaccinationExpirationDate = citizenDTO.getVaccinationExpirationDate();
     }
 
 }

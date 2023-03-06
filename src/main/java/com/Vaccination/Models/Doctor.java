@@ -19,10 +19,11 @@ public class Doctor {
     private Long id;
     private String amka;
     private String name;
+    private String password;
     private String surname;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Appointment> appointments;
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Timeslot> timeslots;
 
     public Doctor(DoctorDTO doctor) {
